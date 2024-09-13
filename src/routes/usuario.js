@@ -103,12 +103,16 @@ router.post(
     const tempPath = req.file.path;
     const format = req.file.mimetype.replace("image/", "");
     const tempName = req.file.fieldname + "-" + Date.now() + "." + format;
-
+c
     try {
       // Call the crearNuevo function
+      console.log(tempName)
+ 
       crearNuevo(req, res, next, tempName).then(() => {
         if (res.statusCode == 201) {
           const finalPath = "uploads/" + tempName;
+        console.log(finalPath)
+
           fs.rename(tempPath, finalPath, (err) => {
             if (err) {
               console.error(err);
