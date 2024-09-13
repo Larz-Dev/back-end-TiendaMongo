@@ -17,6 +17,12 @@ import {
 import multer from "multer";
 import fs from "fs";
 
+const uploadsDir = 'uploads';
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -103,7 +109,7 @@ router.post(
     const tempPath = req.file.path;
     const format = req.file.mimetype.replace("image/", "");
     const tempName = req.file.fieldname + "-" + Date.now() + "." + format;
-c
+
     try {
       // Call the crearNuevo function
       console.log(tempName)
