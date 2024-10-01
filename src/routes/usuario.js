@@ -17,7 +17,7 @@ import {
 import multer from "multer";
 import fs from "fs";
 
-const uploadsDir = 'uploads';
+const uploadsDir = "uploads";
 
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
@@ -62,8 +62,6 @@ const upload = multer({
 
 const uploadMiddleware = upload.single("photo");
 
-
-
 const uploadErrorMiddleware = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {
@@ -76,12 +74,12 @@ const uploadErrorMiddleware = (err, req, res, next) => {
   next(err);
 };
 
-
 //login
 router.post("/login", upload.none(), login);
 router.post(
   "/nuevo",
-  uploadMiddleware,uploadErrorMiddleware,
+  uploadMiddleware,
+  uploadErrorMiddleware,
   [
     check("nombres", "Debe ingresar un nombre").not().isEmpty(),
     check("apellidos", "Debe ingresar un apellido").not().isEmpty(),
@@ -98,12 +96,10 @@ router.post(
   ],
   (req, res, next) => {
     if (!req.file) {
-      res
-        .status(400)
-        .json({
-          status: "error",
-          mensaje: "el archivo no cumple los requisitos",
-        });
+      res.status(400).json({
+        status: "error",
+        mensaje: "el archivo no cumple los requisitos",
+      });
     }
 
     const tempPath = req.file.path;
@@ -112,12 +108,12 @@ router.post(
 
     try {
       // Call the crearNuevo function
-      console.log(tempName)
- 
+      console.log(tempName);
+
       crearNuevo(req, res, next, tempName).then(() => {
         if (res.statusCode == 201) {
           const finalPath = "uploads/" + tempName;
-        console.log(finalPath)
+          console.log(finalPath);
 
           fs.rename(tempPath, finalPath, (err) => {
             if (err) {

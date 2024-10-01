@@ -11,7 +11,7 @@ export const login = async (req, res) => {
   const query = Usuario.findOne({ email: email });
 
   query.select("email");
-
+  query.select("estado");
   query.select("password");
   query.select("nombres");
   query.select("apellidos");
@@ -20,12 +20,19 @@ export const login = async (req, res) => {
 
   const cuenta = await query.exec();
 
+  
   if (cuenta == null) {
     return res.send({
       status: "error",
       mensaje: "correo inválido",
     });
-  } else {
+  }
+  else if (cuenta.estado == 0) {
+    return res.send({
+      status: "error",
+      mensaje: "cuenta inactiva",
+    })}
+    else {
     const rol = await Rol.findOne({ ID_Rol: cuenta.ID_Rol }).select("nombre");
 
     if ((await bcrypt.compare(password, cuenta.password)) == true) {

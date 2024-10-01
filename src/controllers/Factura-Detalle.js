@@ -1,6 +1,7 @@
 import Factura from "../models/Factura-Detalle.js";
 import Usuario from "../models/Usuario.js";
 import { validationResult } from "express-validator";
+import Inventario from "../models/Inventario.js";
 
 // Crear una nueva factura
 export const crearFactura = async (req, res) => {
@@ -15,18 +16,40 @@ export const crearFactura = async (req, res) => {
     });
   }
 
-  const nuevaFactura = new Factura({
-    ID_Usuario,
-    fecha,
-    total,
-    detalles,
-    codigoFactura,
-    iva,
-    productos,
-  });
-
   try {
+    // Check if the products are in stock
+    for (const detalle of detalles) {
+      const inventario = await Inventario.findOne({ ID_Item: detalle.ID_Item });
+      if (!inventario) {
+        throw new Error(`No se encontró el producto con ID_Item ${detalle.ID_Item}`);
+      }
+      const cantidadActual = inventario.cantidad;
+      console.log(`Cantidad actual del producto ${detalle.ID_Item}: ${cantidadActual}`);
+      const nuevaCantidad = cantidadActual - detalle.cantidad;
+      if (nuevaCantidad < 0) {
+        throw new Error(`No hay suficiente stock del producto ${detalle.ID_Item}`);
+      }
+      await Inventario.updateOne(
+        { ID_Item: detalle.ID_Item },
+        { $set: { cantidad: nuevaCantidad } }
+      );
+      console.log(`Cantidad actualizada del producto ${detalle.ID_Item}: ${nuevaCantidad}`);
+    }
+
+    const nuevaFactura = new Factura({
+      ID_Usuario,
+      fecha,
+      total,
+      detalles,
+      codigoFactura,
+      iva,
+      productos,
+    });
+
     await nuevaFactura.save();
+
+    // Update the cantidad of the item in the Inventario model
+    
     res.status(201).send({
       status: "success",
       mensaje: "Factura creada exitosamente",
@@ -114,10 +137,9 @@ export const actualizarFactura = async (req, res) => {
 export const obtenerFacturaCliente = async (req, res) => {
   try {
     const idUsuario = req.body.id; // or however you get the id from the request
-    console.log(idUsuario);
+
     const factura = await Factura.find({ ID_Usuario: idUsuario });
 
-    console.log(factura);
     if (!factura) {
       res.status(404).send({
         status: "error",

@@ -79,7 +79,37 @@ export const obtenerItems = async (req, res) => {
     const items = await Inventario.find();
     const data = await Promise.all(
       items.map(async (item) => {
-        const categoria = await Categoria.findOne({ ID_Categoria: item.ID_Categoria }).select("nombre");
+        const categoria = await Categoria.findOne({
+          ID_Categoria: item.ID_Categoria,
+        }).select("nombre");
+        return {
+          ...item.toObject(),
+          categoria: categoria.nombre,
+        };
+      })
+    );
+    console.log(data);
+    res.status(200).send({
+      status: "success",
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      status: "error",
+      mensaje: "Error al obtener los ítems",
+    });
+  }
+};
+
+export const obtenerItemsVenta = async (req, res) => {
+  try {
+    const items = await Inventario.find({ cantidad: { $gte: 1 } });
+    const data = await Promise.all(
+      items.map(async (item) => {
+        const categoria = await Categoria.findOne({
+          ID_Categoria: item.ID_Categoria,
+        }).select("nombre");
         return {
           ...item.toObject(),
           categoria: categoria.nombre,

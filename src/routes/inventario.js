@@ -11,6 +11,7 @@ import {
   imagenItem,
   obtenerItems,
   editarItem,
+  obtenerItemsVenta,
 } from "../controllers/inventario.js";
 import multer from "multer";
 import fs from "fs";
@@ -98,6 +99,7 @@ router.post(
 router.post("/imagen", upload.none(), imagenItem);
 
 router.get("/obtener", upload.none(), obtenerItems);
+router.get("/obtenerVenta", upload.none(), obtenerItemsVenta);
 
 // Editar item
 router.put(
